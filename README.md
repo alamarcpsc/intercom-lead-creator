@@ -1,5 +1,6 @@
 # intercom-lead-creator
 Chrome browser extension that allows you to create new lead accounts in Intercom.
+https://chrome.google.com/webstore/detail/intercom-lead-creator/pipblbgebpmphicjdbdlcadahpgglbef
 
 # Description
 This Chrome extension uses OAuth on the client side to get an Access Token for your Intercom workspace. The extension then stores the Access Token in Chrome's local storage and provides you with an interface to create leads using the token.
