@@ -1,5 +1,6 @@
 # intercom-lead-creator
 Chrome browser extension that allows you to create new lead accounts in Intercom.
+
 <a href="https://chrome.google.com/webstore/detail/intercom-lead-creator/pipblbgebpmphicjdbdlcadahpgglbef">Link to Web Store</a>
 
 # Description
