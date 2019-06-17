@@ -11,8 +11,8 @@ After you install the extension it will appear in your tool bar:
 
 Clicking the icon will open up the options page if Chrome can't find the Access Token in your local storage. From their you can initiate the OAuth process, check what standard attributes you'd like displayed, and save any custom attributes you'd want to use.
 
-![Options Page](https://user-images.githubusercontent.com/15332721/57656761-2b134600-758e-11e9-9559-1c121c6cda93.png)
+![Options Page](https://user-images.githubusercontent.com/15332721/59628957-9d7bc680-90f6-11e9-8841-587abedf8065.png)
 
 Once you've successfully gone through the OAuth process you should be able to start using the lead creator interface by clicking on the extension is the tool bar. From here you can fill in the fields with the attriubtes you'd want your new lead to have:
 
-![Popup Panel](https://user-images.githubusercontent.com/15332721/57658154-ae369b00-7592-11e9-9564-61d679200db4.png)
+![Popup Panel](https://user-images.githubusercontent.com/15332721/59629065-e0d63500-90f6-11e9-8ea1-3a83afc94752.png)
