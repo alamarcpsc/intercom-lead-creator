@@ -18,3 +18,8 @@ Clicking the icon will open up the options page if Chrome can't find the Access 
 Once you've successfully gone through the OAuth process you should be able to start using the lead creator interface by clicking on the extension is the tool bar. From here you can fill in the fields with the attriubtes you'd want your new lead to have:
 
 <img width="159" alt="Popup Panel" src="https://user-images.githubusercontent.com/15332721/59629621-1e878d80-90f8-11e9-814b-bcc974c6c4d9.png">
+
+# Custom Attribute value type
+All custom attributes are sent over as a string of text. If you want to change the type then you can do that in Intercom:
+
+<img width="476" alt="People data settings" src="https://user-images.githubusercontent.com/15332721/59630508-50015880-90fa-11e9-9842-6ab0f3ef8915.png">
