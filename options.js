@@ -1,4 +1,6 @@
-var submitAuthentication = document.getElementById('submitAuthentication');
+const CLIENT_ID = '********-****-****-****-************';
+const CLIENT_SECRET = '********-****-****-****-************';
+var startAuthentication = document.getElementById('startAuthentication');
 var submitQualificationSettings = document.getElementById('submitQualificationSettings');
 var addNewCustomAttribute = document.getElementById('addNewCustomAttribute');
 var standardQualificationData = {};
@@ -36,7 +38,7 @@ chrome.storage.local.get(['standardQualificationData'], function(storage) {
   }
   else if (storage.standardQualificationData == null) {
     console.log('No standard qualification data stored');
-    standardQualificationData = {email:true, name:true};
+    standardQualificationData = {email:true, name:true, phone:true};
     chrome.storage.local.set({standardQualificationData: standardQualificationData}, function() {
       if (chrome.runtime.lastError) {
         console.log('Error: unable to store access token');
@@ -103,16 +105,16 @@ function displayCustomAttributes() {
   for (let i = 0; i < customAttributeArray.length; i++) {
     customAttributeHtml = customAttributeHtml +
     "<input type='text' value='"+customAttributeArray[i]+"' readonly> "+
-    "<button id='removeAttrbute"+customAttributeArray[i]+"'>-</button>"+
+    "<button id='removeAttribute"+customAttributeArray[i]+"'>-</button>"+
     "<br>";
   }
   document.getElementById('customAttributes').innerHTML = customAttributeHtml;
   for (let i = 0; i < customAttributeArray.length; i++) {
-    document.getElementById("removeAttrbute"+customAttributeArray[i]).addEventListener("click", function(){ removeCustomAttribute(customAttributeArray[i]); });
+    document.getElementById("removeAttribute"+customAttributeArray[i]).addEventListener("click", function(){ removeCustomAttribute(customAttributeArray[i]); });
   }
 };
 
-//adds new custom atribute to customQualificationData
+//adds new custom attribute to customQualificationData
 addNewCustomAttribute.onclick = function(element) {
   let newCustomAttribute = document.getElementById('newCustomAttribute').value;
   if (newCustomAttribute == "") {
@@ -162,17 +164,24 @@ submitQualificationSettings.onclick = function(element) {
   });
 };
 
-//UUID generator used for state parameter
+// Listener to start OAuth process
+startAuthentication.onclick = function(element) {
+  getAuthorizationCode();
+};
+
+// UUID generator used for state parameter
+// Source of method:
+// https://stackoverflow.com/a/2117523
 function uuidv4() {
   return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   )
 };
 
-//OAuth process to get an access token
-submitAuthentication.onclick = function(element) {
-  const CLIENT_ID = '**********';
-  const CLIENT_SECRET = '**********';
+// Initiates OAuth process to get an authorization code
+// Process in Docs:
+// https://developers.intercom.com/building-apps/docs/setting-up-oauth#section-get-the-authorization-code
+function getAuthorizationCode() {
   const UUID = uuidv4();
   const REDIRECT_URL = 'https://'+chrome.runtime.id+'.chromiumapp.org';
   const OAUTH_URL = 'https://app.intercom.io/a/oauth/connect?client_id='+CLIENT_ID+'&state='+UUID+'&redirect_uri='+REDIRECT_URL;
@@ -182,7 +191,7 @@ submitAuthentication.onclick = function(element) {
     interactive: true
   }, function(responseURL) {
     if (responseURL) {
-      //parsing response for authorization code and state
+      // Parsing response for authorization code and state
       let responseParams = responseURL.substring(responseURL.indexOf('?')+1);
       responseParams = responseParams.split('&');
       let params = {};
@@ -192,45 +201,64 @@ submitAuthentication.onclick = function(element) {
       }
       if (params.code && UUID == params.state) {
         console.log('received authorization code');
-        console.log('trading authorization code for an access token');
-        //Post request to eagle endpoint
-        const HTTP = new XMLHttpRequest();
-        const EAGLE_URL='https://api.intercom.io/auth/eagle/token?code='+params.code+'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET;
-        HTTP.open('POST', EAGLE_URL, true);
-        HTTP.send();
-        HTTP.onreadystatechange=(e)=>{
-          if (HTTP.readyState == 4 && HTTP.status == 200) {
-            console.log('received access token');
-            //formatting response string into a token
-            let responseText = HTTP.responseText
-            responseText = responseText.substring(10, responseText.length - 1);
-            responseText = responseText.substring(0, responseText.indexOf('"'));
-            let token = responseText;
-            //storing the access token
-            chrome.storage.local.set({token: token}, function() {
-              if (chrome.runtime.lastError) {
-                console.log('Error: unable to store access token');
-                console.log(chrome.runtime.lastError);
-                return;
-              }
-              console.log('successfully stored access token');
-              document.getElementById('oauthMessage').innerHTML=
-              "<p>Successfully authenticated with Intercom.</p>"+
-              "<p>Click the OAuth button if you'd like to generate a new Access Token:</p>";
-            });
-          }
-          else if (HTTP.status != 200) {
-            console.log('Unexpected non 200 reponse received, status: ' + HTTP.status);
-            document.getElementById('oauthMessage').innerHTML=
-            "<p>Unexpected response.</p>";
-          }
-        }
+        // Trades authorization code for Access Token
+        getAccessToken(params.code);
       }
       else {
         console.log('Error: no authorization code received');
         document.getElementById('oauthMessage').innerHTML=
         "<p>Unexpected response.</p>";
       }
+    }
+  });
+};
+
+// Trades authorization code for an Access Token
+// Process in Docs:
+// https://developers.intercom.com/building-apps/docs/setting-up-oauth#section-trade-your-authorization-code-for-an-access-token
+function getAccessToken(code) {
+  console.log('Trading authorization code for an access token');
+  // Post request to eagle endpoint
+  const HTTP = new XMLHttpRequest();
+  const EAGLE_URL='https://api.intercom.io/auth/eagle/token?code='+code+'&client_id='+CLIENT_ID+'&client_secret='+CLIENT_SECRET;
+  HTTP.open('POST', EAGLE_URL, true);
+  HTTP.send();
+  HTTP.onreadystatechange=(e)=>{
+    if (HTTP.readyState == 4 && HTTP.status == 200) {
+      console.log('Received access token');
+      // Formatting response string into a token
+      let responseText = HTTP.responseText
+      responseText = responseText.substring(10, responseText.length - 1);
+      responseText = responseText.substring(0, responseText.indexOf('"'));
+      let token = responseText;
+      // Storing the access token
+      storeAccessToken(token);
+    }
+    else if (HTTP.status != 200) {
+      console.log('Unexpected non 200 response received, status: ' + HTTP.status);
+      document.getElementById('oauthMessage').innerHTML=
+      "<p>Unexpected response.</p>";
+    }
+  }
+};
+
+// Stores Access Token in Chrome's local storage
+// Chrome sample app where this is done:
+// https://github.com/GoogleChrome/chrome-app-samples/blob/22897c98e87435f16d57ddbd7301815d7f4d1180/samples/appsquare/foursquare.js#L20
+function storeAccessToken(token) {
+  console.log('Storing access token');
+  chrome.storage.local.set({token: token}, function() {
+    if (chrome.runtime.lastError) {
+      console.log('Error: unable to store access token');
+      console.log(chrome.runtime.lastError);
+      document.getElementById('oauthMessage').innerHTML=
+      "<p>Unable to store Access Token.</p>";
+    }
+    else {
+      console.log('Successfully stored access token');
+      document.getElementById('oauthMessage').innerHTML=
+      "<p>Successfully authenticated with Intercom.</p>"+
+      "<p>Click the OAuth button if you'd like to generate a new Access Token:</p>";
     }
   });
 };
