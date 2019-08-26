@@ -16,7 +16,7 @@ chrome.storage.local.get(['token'], function(storage) {
     console.log('Error: no token stored');
     document.getElementById('content').innerHTML=
     "<p>It doesn't look like you've authenticated the extension yet with Intercom.</p>"+
-    "<p>Authtenicate through the extension's settings page.</p>";
+    "<p>Authenticate through the extension's settings page.</p>";
     chrome.runtime.openOptionsPage();
   }
   else {
@@ -113,11 +113,11 @@ submitLead.onclick = function(element) {
   data.custom_attributes = customData;
   //convert JSON object to JSON string
   let requestBody = JSON.stringify(data);
-  //Post reqeust to contacts endpoint
+  //Post request to contacts endpoint
   const HTTP = new XMLHttpRequest();
   HTTP.open("POST", CONTACTS_URL, true);
-  HTTP.setRequestHeader("Accept", "application/json ");
-  HTTP.setRequestHeader("Content-type", "application/json ");
+  HTTP.setRequestHeader("Accept", "application/json");
+  HTTP.setRequestHeader("Content-type", "application/json");
   HTTP.setRequestHeader("Authorization", "Bearer " + ACCESS_TOKEN);
   HTTP.send(requestBody);
   HTTP.onreadystatechange=(e)=>{
@@ -127,7 +127,7 @@ submitLead.onclick = function(element) {
       "<p>Successfully created lead!</p>";
     }
     else if (HTTP.status != 200) {
-      console.log('Unexpected non 200 reponse received, status: ' + HTTP.status);
+      console.log('Unexpected non 200 response received, status: ' + HTTP.status);
       document.getElementById('statusMessage').innerHTML=
       "<p>Unexpected response.</p>";
     }
