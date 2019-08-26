@@ -26,3 +26,9 @@ Once you've successfully gone through the OAuth process you should be able to st
 All custom attributes are sent over as a string of text. If you want to change the type of the attribute then you can do that in the settings of your Intercom workspace:
 
 <img width="476" alt="People data settings" src="https://user-images.githubusercontent.com/15332721/59630508-50015880-90fa-11e9-9842-6ab0f3ef8915.png">
+
+# Intercom product change
+After this project was released, Intercom added the ability to manually create users and leads through their UI:
+https://www.intercom.com/changes/en/manually-add-new-leads-and-users-without-needing-to-import-
+
+At the moment, the only benefit this extension has over the native feature is that you can add custom attributes and a phone number to your manually created leads.
